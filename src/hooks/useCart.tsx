@@ -23,11 +23,12 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    // const storagedCart = Buscar dados do localStorage
+    //Buscar dados do localStoragehttp://localhost:3000/
+    const storagedCart = localStorage.getItem('@RocketShoes:cart');
 
-    // if (storagedCart) {
-    //   return JSON.parse(storagedCart);
-    // }
+    if (storagedCart) {
+      return JSON.parse(storagedCart);
+    }
 
     return [];
   });
@@ -35,16 +36,62 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       // TODO
-    } catch {
+
+      const { data: productStock } = await api.get<Stock>(`/stock/${productId}`);
+
+      const existProduct = cart.find(product => product.id === productId);
+
+      if ((productStock.amount === 0) ||
+        ((existProduct) &&
+          (existProduct.amount >= productStock.amount))) {
+        throw new Error('Quantidade solicitada fora de estoque');
+      }
+
+      let newCart;
+      if (!existProduct) {
+        const { data } = await api.get<Omit<Product, 'amount'>>(`/products/${productId}`);
+
+        newCart = [...cart,
+        {
+          ...data,
+          amount: 1
+        }
+        ];
+      } else {
+
+        newCart = cart.map(product => product.id !== productId ? product : {
+          ...product,
+          amount: product.amount + 1
+        })
+      }
+
+      setCart(newCart);
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart));
+
+    } catch (e: any) {
       // TODO
+      toast.error(e.message.includes('fora de estoque') ? e.message : 'Erro na adição do produto');
     }
   };
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
+
+      const existProduct = cart.find(product => product.id === productId);
+
+      if (!existProduct) {
+        throw new Error();
+      }
+
+      const newCart = cart.filter(product => product.id !== productId);
+
+      setCart(newCart);
+
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart));
+
     } catch {
       // TODO
+      toast.error('Erro na remoção do produto')
     }
   };
 
@@ -54,8 +101,28 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   }: UpdateProductAmount) => {
     try {
       // TODO
-    } catch {
+      if (amount <= 0) {
+        return
+      }
+
+      const { data: productStock } = await api.get<Stock>(`/stock/${productId}`);
+
+      if (productStock.amount < amount) {
+        throw new Error('Quantidade solicitada fora de estoque');
+      }
+
+      const newCart = cart.map(product => product.id !== productId ? product : {
+        ...product,
+        amount: amount
+      });
+
+      setCart(newCart);
+
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart));
+
+    } catch (err: any) {
       // TODO
+      toast.error(err.message.includes('fora de estoque') ? err.message : 'Erro na alteração de quantidade do produto');
     }
   };
 
