@@ -8,9 +8,9 @@ In the project directory, you can run:
 
 Runs the JSON Server - Fake REST API in the development mode.\
 Quick back-end for prototyping and mocking.\
-Open [http://localhost:3333](http://localhost:3333) to view it in the browser.\
+Open [http://localhost:3333](http://localhost:3333) to view it in the browser.
 
-Resources\
+Resources
   http://localhost:3333/stock
   http://localhost:3333/products
 
