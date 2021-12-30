@@ -10,8 +10,8 @@ Runs the JSON Server - Fake REST API in the development mode.\
 Quick back-end for prototyping and mocking.\
 Open [http://localhost:3333](http://localhost:3333) to view it in the browser.
 
-Resources
-  http://localhost:3333/stock
+Resources\
+  http://localhost:3333/stock \
   http://localhost:3333/products
 
 
